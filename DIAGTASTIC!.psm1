@@ -12,7 +12,7 @@ import-module PSSQLite -ErrorVariable $sqlite_import_error
 if($sqlite_import_error){
 
     # Install PSSQLite
-    Install-Module -Name PSSQLite
+    Install-Module -Name PSSQLite -Force
 }
 
 # Check for this module's database
@@ -54,12 +54,30 @@ function New-Incident {
 
     #>
 
+
+
     # Define the parameters of this function in a param block.
     [CmdletBinding()]
     param (
-        [String[]]$IncidentName
+        [parameter(Mandatory=$true)][String[]]$Name
     )
+    $query = "
+    CREATE TABLE '$($Name)' (
+	'date_logged'	TEXT UNIQUE,
+	'date_occured'	TEXT,
+	'incident_angle'	TEXT,
+	'entry_source'	TEXT,
+	'entry_notes'	TEXT
+)"
+    # Where is the database?
+    $database = '~\.diagtastic\db.sqlite'
 
+    # Create the table to track this incident's troubleshooting
+    Invoke-SqliteQuery -Database $database -Query $query
+
+    # Create initial entry signifying when troubleshooting started.
+    $initial_incident_entry = "INSERT INTO '$($Name)' ('date_logged', 'incident_angle', 'entry_source', 'entry_notes') VALUES ('$(Get-Date)', 'Initial', 'Diagtastic', 'Started researching the problem.')"
+    Invoke-SqliteQuery -Database $database -Query $initial_incident_entry
 
 }
 
