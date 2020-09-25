@@ -4,7 +4,6 @@
 # Date: 9/22/20
 #
 
-
 # Try to import SQLITE if you get an error write it to sqlite_import_error, SEWPER LAZY catch.
 import-module PSSQLite -ErrorVariable $sqlite_import_error
 
@@ -20,6 +19,9 @@ Switch (Test-Path -Path '~\.diagtastic'){
 
     #If the directory exists
     $true{
+
+        # Set the database location throughout the script so every function can work from it. 
+        $global:database = '~\.diagtastic\db.sqlite'
 
         # keep going don't do anything.
         continue
@@ -45,13 +47,13 @@ Switch (Test-Path -Path '~\.diagtastic'){
 function New-Incident {
     <#
         .DESCRIPTION
+        Use this funciton to create a new research log for a given incident.
 
         .EXAMPLE
+        New-Incident -Name My_incident
 
         .EXAMPLE
-
-        .EXAMPLE
-
+        New-Incident -Name MyIncident
     #>
 
 
@@ -69,8 +71,6 @@ function New-Incident {
 	'entry_source'	TEXT,
 	'entry_notes'	TEXT
 )"
-    # Where is the database?
-    $database = '~\.diagtastic\db.sqlite'
 
     # Create the table to track this incident's troubleshooting
     Invoke-SqliteQuery -Database $database -Query $query
@@ -82,5 +82,23 @@ function New-Incident {
 }
 
 function Update-Incident {
+    <#
+        .DESCRIPTION
+        Use this command to update your research time line
 
+        .EXAMPLE
+    #>
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)][String]$Incident,
+        [Parameter(Mandatory=$false)][String]$Occurred,
+        [Parameter(Mandatory=$true)][String]$Angle, 
+        [Parameter(Mandatory=$true)][String]$Source, 
+        [Parameter(Mandatory=$true)][String]$Notes
+    )
+
+    $update_incident_table = "INSERT INTO '$($Incident)' ('date_logged', 'date_occured', 'incident_angle', 'entry_source', 'entry_notes') VALUES ('$(Get-Date)', '$($Occurred)', '$($Angle)', '$($Source)', '$($Notes)')"
+
+    Invoke-SqliteQuery -Database $database -Query $update_incident_table
 }
