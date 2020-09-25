@@ -102,3 +102,60 @@ function Update-Incident {
 
     Invoke-SqliteQuery -Database $database -Query $update_incident_table
 }
+
+function Remove-Incident {
+    <#
+        .DESCRIPTION
+        Use this function to remove incidents from your console.
+
+        .EXAMPLE
+        Remove-Incident -Name MyIncident
+
+        .EXAMPLE
+        Remove-Incident -name "My Incident"
+    #>
+    param (
+        [Parameter(Mandatory=$true)][String]$Name
+    )
+}
+function Export-Incident {
+    <#
+        .DESCRIPTION
+        Use this function to export a troubleshooting timeline out of your console.
+
+        .EXAMPLE
+        Export-Incident -Name MyIncident
+    
+        .EXAMPLE
+        Export-Incident
+
+    #>
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$false)][String]$Name
+    )
+
+    # If there was no name variable supplied with the invokation...
+    if(!$Name){
+        
+        # Get all incident names
+        $list_of_all_incidents = Invoke-SqliteQuery -database $database -Query "SELECT name FROM sqlite_master WHERE type='table';"
+
+        $incident_selection = $incident_selection = Read-Host "Using base 0, select the incident you want to export" $($list_of_all_incidents | ForEach-Object -Process {Write-Host $_.name})
+
+        $query = "SELECT * FROM '$($list_of_all_incidents[$incident_selection].name)'"
+
+        Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ~\Documents\$incident-$(Get-Date).csv
+    }
+}
+
+function Import-incident {
+    <#
+    
+        .DESCRIPTION
+        Use this function to import a troubleshooting timeline into your console
+    #>
+
+}
+
