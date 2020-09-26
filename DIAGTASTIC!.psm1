@@ -117,6 +117,9 @@ function Remove-Incident {
     param (
         [Parameter(Mandatory=$true)][String]$Name
     )
+
+
+
 }
 function Export-Incident {
     <#
@@ -133,20 +136,75 @@ function Export-Incident {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$false)][String]$Name
+        [Parameter(Mandatory=$false)][String]$Name,
+        [Parameter(Mandatory=$false)][String]$Path
     )
 
-    # If there was no name variable supplied with the invokation...
+    # If there was no incident name supplied, go ahead and walk the user through the export.
     if(!$Name){
         
         # Get all incident names
         $list_of_all_incidents = Invoke-SqliteQuery -database $database -Query "SELECT name FROM sqlite_master WHERE type='table';"
 
+        # Get the incident the user wants to export
         $incident_selection = $incident_selection = Read-Host "Using base 0, select the incident you want to export" $($list_of_all_incidents | ForEach-Object -Process {Write-Host $_.name})
 
+        # Format a query to get all the rows from the table in the database the incident research is stored in
         $query = "SELECT * FROM '$($list_of_all_incidents[$incident_selection].name)'"
 
-        Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ~\Documents\$incident-$(Get-Date).csv
+        # Now lets move on to exporting those incidents. Lets start by checking to see if the user supplied a path...
+        switch($Path){
+
+            # OPTION 1: If the path variable is empty ie. not defined...
+            (""){
+                
+                # Now actually query the database for rows and export them to a CSV where the user specified.
+                $File_name = 'Incident' + ($File_name = $(Get-Date -Format "MM/dd/yyyy").replace('/','-').replace(' ', '').toString()) + '.csv'
+                Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ~\Desktop\$File_name
+
+                # Interestingly enough, it looks like the switch keeps evaluating so for speed's sake, lets skip the rest of the switch.
+                continue
+            }
+
+            # OPTION 2: if the user did specify a path, use that for the export.
+            ($Path){
+                $File_name = 'Incident' + ($File_name = $(Get-Date -Format "MM/dd/yyyy").replace('/','-').replace(' ', '').toString()) + '.csv'
+                Invoke-SqliteQuery -database $database -query $query | Export-CSV -Path ($Path +  '/' + $File_name)
+
+                # Interestingly enough, it look slike the switch keeps evaluating so for speed's sake, lets skip the rest of the swith.
+                continue
+            }
+        }
+
+        # Now that the incident has been exported, Give the user a message to let them know the task is done. 
+        Write-Host "Your incident has been exported."   
+    }
+
+    # Otherwise, a name was provided so export that incident.
+    else{
+        Write-Host "You must specify an incident to export."
+
+        # Format a query to get all the rows from the table in the database the incident research is stored in
+        $query = "SELECT * FROM '$($list_of_all_incidents[$incident_selection].name)'"
+
+        # Now lets move on to exporting those incidents. Lets start by checking to see if the user supplied a path...
+        switch($Path){
+
+            # OPTION 1: If the path variable is empty ie. not defined...
+            ($Path -eq ""){
+                
+                # Now actually query the database for rows and export them to a CSV where the user specified.
+                Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ($Path += "\$incident-$(Get-Date).csv")
+            }
+
+            # OPTION 2: if the user did specify a path, use that for the export.
+            $Path{
+                Invoke-SqliteQuery -database $database -query $query | Export-CSV -Path ~\Desktop\$incident-$(Get-Date).csv
+            }
+        }
+
+        # Now that the incident has been exported, Give the user a message to let them know the task is done. 
+        Write-Host "Your incident has been exported."   
     }
 }
 
