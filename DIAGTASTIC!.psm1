@@ -7,7 +7,6 @@
 # Try to import SQLITE if you get an error write it to sqlite_import_error, SEWPER LAZY catch.
 import-module PSSQLite
 
-
 # Check for this module's database
 Switch (Test-Path -Path '~\.diagtastic'){
 
@@ -51,6 +50,9 @@ function New-Incident {
 
         .EXAMPLE
         New-Incident -Name MyIncident
+
+        .VERSION
+        
     #>
 
 
@@ -100,7 +102,6 @@ function Update-Incident {
     Invoke-SqliteQuery -Database $database -Query $update_incident_table
 }
 
-#TODO
 function Remove-Incident {
     <#
         .DESCRIPTION
