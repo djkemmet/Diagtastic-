@@ -43,6 +43,10 @@ Switch (Test-Path -Path '~\.diagtastic'){
     }
 }
 
+#
+# Start cmdlet definitions
+#
+
 
 function New-Incident {
     <#
@@ -103,6 +107,7 @@ function Update-Incident {
     Invoke-SqliteQuery -Database $database -Query $update_incident_table
 }
 
+#TODO
 function Remove-Incident {
     <#
         .DESCRIPTION
@@ -119,6 +124,11 @@ function Remove-Incident {
     )
 
 
+
+}
+
+#TODO
+function get-Incident {
 
 }
 function Export-Incident {
@@ -182,7 +192,6 @@ function Export-Incident {
 
     # Otherwise, a name was provided so export that incident.
     else{
-        Write-Host "You must specify an incident to export."
 
         # Format a query to get all the rows from the table in the database the incident research is stored in
         $query = "SELECT * FROM '$($list_of_all_incidents[$incident_selection].name)'"
@@ -191,15 +200,23 @@ function Export-Incident {
         switch($Path){
 
             # OPTION 1: If the path variable is empty ie. not defined...
-            ($Path -eq ""){
+            (""){
                 
                 # Now actually query the database for rows and export them to a CSV where the user specified.
-                Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ($Path += "\$incident-$(Get-Date).csv")
+                $File_name = 'Incident' + ($File_name = $(Get-Date -Format "MM/dd/yyyy").replace('/','-').replace(' ', '').toString()) + '.csv'
+                Invoke-SqliteQuery -database $database -Query $query | Export-Csv -Path ~\Desktop\$File_name
+
+                # Interestingly enough, it looks like the switch keeps evaluating so for speed's sake, lets skip the rest of the switch.
+                continue
             }
 
             # OPTION 2: if the user did specify a path, use that for the export.
-            $Path{
-                Invoke-SqliteQuery -database $database -query $query | Export-CSV -Path ~\Desktop\$incident-$(Get-Date).csv
+            ($Path){
+                $File_name = 'Incident' + ($File_name = $(Get-Date -Format "MM/dd/yyyy").replace('/','-').replace(' ', '').toString()) + '.csv'
+                Invoke-SqliteQuery -database $database -query $query | Export-CSV -Path ($Path +  '/' + $File_name)
+
+                # Interestingly enough, it look slike the switch keeps evaluating so for speed's sake, lets skip the rest of the swith.
+                continue
             }
         }
 
