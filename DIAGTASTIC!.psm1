@@ -47,7 +47,6 @@ Switch (Test-Path -Path '~\.diagtastic'){
 # Start cmdlet definitions
 #
 
-
 function New-Incident {
     <#
         .DESCRIPTION
@@ -127,10 +126,6 @@ function Remove-Incident {
 
 }
 
-#TODO
-function get-Incident {
-
-}
 function Export-Incident {
     <#
         .DESCRIPTION
@@ -194,7 +189,7 @@ function Export-Incident {
     else{
 
         # Format a query to get all the rows from the table in the database the incident research is stored in
-        $query = "SELECT * FROM '$($list_of_all_incidents[$incident_selection].name)'"
+        $query = "SELECT * FROM '$($Name)'"
 
         # Now lets move on to exporting those incidents. Lets start by checking to see if the user supplied a path...
         switch($Path){
@@ -225,12 +220,23 @@ function Export-Incident {
     }
 }
 
-function Import-incident {
+function Import-Incident {
     <#
-    
         .DESCRIPTION
         Use this function to import a troubleshooting timeline into your console
+
+        .EXAMPLE
+        Import-Incident -Path C:\Users\dj\Downloads\myincident.csv
+
     #>
+
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)][String]$Name,
+        [Parameter(mandatory=$True)][String]$Path
+    )
+
+    Import-CSV -Path $Path 
 
 }
 
