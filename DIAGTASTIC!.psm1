@@ -5,14 +5,8 @@
 #
 
 # Try to import SQLITE if you get an error write it to sqlite_import_error, SEWPER LAZY catch.
-import-module PSSQLite -ErrorVariable $sqlite_import_error
+import-module PSSQLite
 
-# If you got an error message, install PSSQLite...
-if($sqlite_import_error){
-
-    # Install PSSQLite
-    Install-Module -Name PSSQLite -Force
-}
 
 # Check for this module's database
 Switch (Test-Path -Path '~\.diagtastic'){
@@ -122,6 +116,13 @@ function Remove-Incident {
         [Parameter(Mandatory=$true)][String]$Name
     )
 
+    # Make our Drop Query
+    $query = "DROP TABLE $($Name)"
+
+    # Execute Drop Query
+    Invoke-SqliteQuery -Database $database -Query $query
+
+    Write-Host "Table $($Name) has been dropped."
 
 
 }
