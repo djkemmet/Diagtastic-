@@ -232,11 +232,32 @@ function Import-Incident {
 
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true)][String]$Name,
+        [Parameter(Mandatory=$True)][String]$Name,
         [Parameter(mandatory=$True)][String]$Path
     )
 
-    Import-CSV -Path $Path 
+    # First, Create a table with the incident name to dump incident research into
+    $query = "
+    CREATE TABLE '$($Name)' (
+    'date_logged'	TEXT UNIQUE,
+    'date_occured'	TEXT,
+    'incident_angle'	TEXT,
+    'entry_source'	TEXT,
+    'entry_notes'	TEXT
+)"
 
+    # make the table defined
+    Invoke-SqliteQuery -Database $database -Query $query
+
+    # okay now import incident research into a variable called rows
+    Import-CSV -Path $Path | ForEach-Object -Process {
+
+        # Format a query with our row data.
+        $query = "INSERT INTO $($Name) ('date_logged','date_occured','incident_angle','entry_source','entry_notes') VALUES ('$($_.date_logged)','$($_.date_occured)','$($_.incident_angle)','$($_.entry_source)','$($_.entry_notes)')"
+
+        # Execute the query
+        Invoke-SqliteQuery -Database $database -Query $query
+
+    }
 }
 
