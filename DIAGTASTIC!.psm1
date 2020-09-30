@@ -29,10 +29,33 @@ Switch (Test-Path -Path '~\.diagtastic'){
         # Setup database
         $database = '~\.diagtastic\db.sqlite'
         
-        $create_angles_table = 'CREATE TABLE "angle" ("angle_name"	TEXT UNIQUE)'
-
+        # Create tables angle query, then create it.  
+        $create_angles_table = 'CREATE TABLE "Angles" (
+            "Angle"	TEXT UNIQUE,
+            "Description"	TEXT
+        )'
         Invoke-SqliteQuery -Database $database -Query $create_angles_table
-        
+
+        #
+        # Now insert the layers of the OSI models into this table.
+        #
+        $Application_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Application 7', 'This angle is fo sources like applications. THings like Outlook, antivirus software etc.')"
+        $Presnetation_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Presentation 6', 'This angle is for sources like file formats. like PDFs, PSTs, MP4 etc. Is the problem with the file?')"
+        $Session_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Session 5','This angle is for things like, credentials, application sessions, cookies, etc')"
+        $Transportation_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Transport 4','This angle is for things like the protocols in use, most commonly TCP and UDP. an example might be something like lost data from the use of UDP')"
+        $Network_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Network 3','Network Specific - How does data get from A to B? Sources for this angle might be things like Routes in networking equipment, IP Address, QoS, and hardware like routers and gateways.')"
+        $Data_link_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Data Link 2','Network Specific - Ensures the reliable node-to-node delivery of data. Framing data, physicall adderssing (mac addresses) flow and access control.')"
+        $Physical_layer_query = "INSERT INTO Angles (Angle, Description) VALUES ('Physical 1','this layer is for the tangibles of the incident, computers, cables, scanners, printers etc.')"
+
+        # Now Execute them all 
+        Invoke-SqliteQuery -Database $database -Query $Application_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Presnetation_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Session_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Transportation_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Network_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Data_link_layer_query
+        Invoke-SqliteQuery -Database $database -Query $Physical_layer_query
+    
     }
 }
 
