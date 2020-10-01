@@ -115,7 +115,7 @@ function Update-Incident {
     param (
         [Parameter(Mandatory=$true)][String]$Incident,
         [Parameter(Mandatory=$false)][String]$Occurred,
-        [Parameter(Mandatory=$true)][String]$Angle, 
+        [Parameter(Mandatory=$true)][ValidateSet('Application 7','Presentation 6','Session 5','Transport 4','Network 3','Data Link 2','Physical 1')][String]$Angle, 
         [Parameter(Mandatory=$true)][String]$Source, 
         [Parameter(Mandatory=$true)][String]$Notes
     )
